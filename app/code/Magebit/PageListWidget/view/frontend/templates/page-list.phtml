@@ -1,0 +1,22 @@
+<?php
+/** @var \Magebit\PageListWidget\Block\Widget\PageList $block */
+/** @var \Magento\Framework\Escaper $escaper */
+?>
+
+<?php if ($widgetTitle = $block->getData('title')): ?>
+    <h2><?= $escaper->escapeHtml($widgetTitle); ?></h2>
+<?php endif; ?>
+
+<?php if ($pages = $block->getSelectedPages()): ?>
+    <ul class="page-list-widget">
+        <?php foreach ($pages as $page): ?>
+            <li>
+                <a href="<?= $block->getUrl($page->getIdentifier()) ?>">
+                    <?= $escaper->escapeHtml($page->getTitle()) ?>
+                </a>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+<?php else: ?>
+    <p>No pages available.</p>
+<?php endif; ?>

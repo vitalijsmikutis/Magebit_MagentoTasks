@@ -1,0 +1,115 @@
+<?php
+
+/**
+ * This file is part of the Magebit package.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magebit ProductAttributes
+ * to newer versions in the future.
+ *
+ * @copyright Copyright (c) 2024 Magebit, Ltd. (https://magebit.com/)
+ * @license   GNU General Public License ("GPL") v3.0
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+/* @var $block \Magento\Catalog\Block\Product\AbstractProduct */
+
+/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
+?>
+
+<?php
+switch ($type = $block->getType()) {
+    case 'related':
+        /** @var \Magento\Catalog\Block\Product\ProductList\Related $block */
+        if ($exist = $block->getItems()->getSize()) {
+            $type = 'related';
+            $image = 'related_products_list';
+            $title = __('Related Products');
+            $items = $block->getItems();
+            $canItemsAddToCart = $block->canItemsAddToCart();
+        }
+        break;
+
+    case 'upsell':
+        /** @var \Magento\Catalog\Block\Product\ProductList\Upsell $block */
+        if ($exist = count($block->getItemCollection()->getItems())) {
+            $type = 'upsell';
+            $image = 'upsell_products_list';
+            $title = __('We found other products you might like!');
+            $items = $block->getItemCollection()->getItems();
+        }
+        break;
+
+    default:
+        $exist = null;
+}
+$_item = null;
+?>
+
+<?php if ($exist): ?>
+    <?php if ($type == 'upsell'): ?>
+        <div class="upsale-container">
+            <strong class="upsale-title">
+                <span><?= $block->escapeHtml($title) ?></span>
+            </strong>
+
+            <div class="upsale-item-container">
+                <?php foreach ($items as $_item): ?>
+                    <div class="upsale-item-container">
+                        <a href="<?= $_item->getProductUrl() ?>" title="<?= $block->escapeHtml($_item->getName()) ?>">
+                            <img src="<?= $block->getImage($_item, $image)->getImageUrl() ?>" alt="<?= $block->escapeHtml($_item->getName()) ?>" />
+                        </a>
+                        <div class="product-item-details">
+                            <strong class="product-item-name"><?= $block->escapeHtml($_item->getName()) ?></strong>
+                            <?= $block->getReviewsSummaryHtml($_item, 'short') ?>
+                            <div class="product-item-price ">
+                                <?= /* @noEscape */ $block->getProductPrice($_item) ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="product-item-action">
+                        <a href="<?= $_item->getProductUrl() ?>" title="<?= __('View Product') ?>">
+                            <button class="view-product-btn"><?= __('View Product') ?></button>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($type == 'related'): ?>
+        <div class="related-container">
+            <div class="container-label">
+                <strong class="related-title">
+                    <span><?= $block->escapeHtml($title) ?></span>
+                </strong>
+            </div>
+            <div class="related-item-container">
+                <?php foreach ($items as $_item): ?>
+                    <div class="related-item">
+                        <div class="product-item-details">
+                            <a href="<?= $_item->getProductUrl() ?>" title="<?= $block->escapeHtml($_item->getName()) ?>">
+                                <img src="<?= $block->getImage($_item, $image)->getImageUrl() ?>" alt="<?= $block->escapeHtml($_item->getName()) ?>" />
+                            </a>
+                            <strong class="product-item-name"><?= $block->escapeHtml($_item->getName()) ?></strong>
+                            <?= $block->getReviewsSummaryHtml($_item, 'short') ?>
+                            <div class="product-item-price">
+                                <?= $block->getProductPrice($_item) ?>
+                            </div>
+                        </div>
+                        <div class="product-item-action">
+                            <?php if ($canItemsAddToCart): ?>
+                                <form action="<?= $block->getAddToCartUrl($_item) ?>" method="post">
+                                    <button type="submit" class="add-to-cart-custom-btn"><?= __('Add to Basket') ?></button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+<?php endif; ?>

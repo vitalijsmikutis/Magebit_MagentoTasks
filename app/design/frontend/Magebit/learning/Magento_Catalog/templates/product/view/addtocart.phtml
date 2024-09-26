@@ -1,0 +1,86 @@
+<?php
+
+/**
+ * This file is part of the Magebit package.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magebit PageListWidget
+ * to newer versions in the future.
+ *
+ * @copyright Copyright (c) 2022 Magebit, Ltd. (https://magebit.com/)
+ * @license   GNU General Public License ("GPL") v3.0
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+// phpcs:disable Magento2.Templates.ThisInTemplate.FoundThis
+
+/** @var \Magento\Catalog\Block\Product\View $block */
+?>
+
+<?php
+$product = $block->getProduct();
+$stockItem = $product->getExtensionAttributes()->getStockItem();
+$maxQty = $stockItem ? $stockItem->getQty() : 1;
+
+$imagePath = $block->getData('image_path');
+
+?>
+
+<div class="add-to-cart-container" id="custom-counter" data-bind="scope: 'qtyCounter'">
+    <div class="qty-section">
+
+        <div class="qty-buttons">
+            <button type="button" class="qty-button qty-decrease" data-bind="click: decreaseQty">
+                <span>-</span>
+            </button>
+
+            <input type="number" id="qty" class="qty-input" data-bind="value: qty, attr: { max: maxQty }, enable: false">
+
+            <button type="button" class="qty-button qty-increase" data-bind="click: increaseQty">
+                <span>+</span>
+            </button>
+        </div>
+
+        <?php if ($maxQty > 0): ?>
+            <div class="stock-status">
+                <strong>
+                    <img class="stock-checkmark" src="<?= $block->getViewFileUrl($imagePath) ?>" alt="In Stock">
+                    IN STOCK
+                </strong>
+                <span><?= $maxQty ?> items available</span>
+            </div>
+        <?php else: ?>
+            <div class="stock-status">
+                <strong style="color: red;">OUT OF STOCK</strong>
+            </div>
+        <?php endif; ?>
+
+    </div>
+
+    <form action="<?= $block->getAddToCartUrl($product) ?>" method="post">
+        <input type="hidden" name="product" value="<?= $product->getId() ?>">
+        <input type="hidden" name="qty" data-bind="value: qty">
+        <button type="submit" class="add-to-cart-custom-btn">
+            <?= __('Add to Cart') ?>
+        </button>
+    </form>
+</div>
+
+<script type="text/x-magento-init">
+    {
+        "#custom-counter": {
+            "Magento_Ui/js/core/app": {
+                "components": {
+                    "qtyCounter": {
+                        "component": "Magento_Catalog/js/qty-counter",
+                        "qty": 1,
+                        "maxQty": <?= $maxQty ?>
+                    }
+                }
+            }
+        }
+    }
+</script>
