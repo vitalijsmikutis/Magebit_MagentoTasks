@@ -1,0 +1,28 @@
+# Magento 2 specific files and directories
+/.idea/
+/.vscode/
+/vendor/
+/pub/media/
+/pub/static/
+/var/
+/generated/
+/composer.lock
+/.phpunit.result.cache
+
+# Ignore log files and temp files
+*.log
+*.cache
+*.tmp
+
+# Ignore environment and configuration files
+.env
+.env.local
+.env.*.local
+app/etc/env.php
+app/etc/config.php
+
+# Ignore other common files and folders
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
