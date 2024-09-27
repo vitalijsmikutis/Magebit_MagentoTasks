@@ -15,13 +15,16 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Magebit\PageListWidget\Block\Widget;
 
+use Magento\Cms\Api\Data\PageInterface;
 use Magento\Cms\Api\PageRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\View\Element\Template;
 use Magento\Widget\Block\BlockInterface;
-use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\View\Element\Template\Context;
 
 /**
  * PageList Widget Block
@@ -38,33 +41,17 @@ class PageList extends Template implements BlockInterface
     protected $_template = 'Magebit_PageListWidget::page-list.phtml';
 
     /**
-     * Page repository interface to retrieve CMS pages.
+     * Constructor.
      *
-     * @var PageRepositoryInterface
-     */
-    protected $pageRepository;
-
-    /**
-     * Search criteria builder to define search filters for pages.
-     *
-     * @var SearchCriteriaBuilder
-     */
-    protected $searchCriteriaBuilder;
-
-    /**
-     * Constructor
-     *
-     * @param Template\Context $context
+     * @param Context $context
      * @param PageRepositoryInterface $pageRepository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
-        Template\Context $context,
-        PageRepositoryInterface $pageRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        private readonly Context $context,
+        private readonly PageRepositoryInterface $pageRepository,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
-        $this->pageRepository = $pageRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         parent::__construct($context);
     }
 
@@ -74,9 +61,9 @@ class PageList extends Template implements BlockInterface
      * If the display mode is set to 'all_pages', this method will return all CMS pages.
      * If the display mode is 'specific_page', only the selected pages will be retrieved.
      *
-     * @return \Magento\Cms\Api\Data\PageInterface[] Array of page entities.
+     * @return PageInterface[]
      */
-    public function getSelectedPages()
+    public function getSelectedPages(): array
     {
         $selectedPages = $this->getData('selected_page');
 

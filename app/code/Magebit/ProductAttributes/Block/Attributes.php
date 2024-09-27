@@ -15,6 +15,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Magebit\ProductAttributes\Block;
 
 use Magento\Framework\View\Element\Template\Context;
@@ -23,6 +25,7 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Registry;
 use Magento\Catalog\Model\Product;
 use Magento\Framework\Phrase;
+use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 
 /**
  * Attributes Block
@@ -33,42 +36,28 @@ use Magento\Framework\Phrase;
 class Attributes extends Template
 {
     /**
-     * Registry to fetch the current product from the Magento registry.
-     *
-     * @var Registry
-     */
-    protected $registry;
-
-    /**
-     * @var Product
-     */
-    protected $_product = null;
-
-    /**
      * Predefined attribute list to prioritize.
      */
-    const ATTRIBUTES_TO_SHOW = [
+    private const ATTRIBUTES_TO_SHOW = [
         'colour' => 'Colour',
         'dimensions' => 'Dimensions',
         'material' => 'Material'
     ];
 
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param Template\Context $context
+     * @param Context $context
      * @param ProductRepositoryInterface $productRepository
      * @param Registry $registry
      * @param array $data
      */
     public function __construct(
-        Context $context,
-        ProductRepositoryInterface $productRepository,
-        Registry $registry,
+        private readonly Context $context,
+        private readonly ProductRepositoryInterface $productRepository,
+        private readonly Registry $registry,
         array $data = []
     ) {
-        $this->productRepository = $productRepository;
-        $this->registry = $registry;
         parent::__construct($context, $data);
     }
 
@@ -77,7 +66,7 @@ class Attributes extends Template
      *
      * @return Product|null
      */
-    public function getProduct()
+    public function getProduct(): ?Product
     {
         return $this->registry->registry('current_product');
     }
@@ -88,10 +77,15 @@ class Attributes extends Template
      * @param array $excludeAttr
      * @return array
      */
-    public function getAdditionalData(array $excludeAttr = [])
+    public function getAdditionalData(array $excludeAttr = []): array
     {
         $data = [];
         $product = $this->getProduct();
+
+        if (!$product) {
+            return $data;
+        }
+
         $attributes = $product->getAttributes();
 
         $defaultAttributes = [];
@@ -103,7 +97,7 @@ class Attributes extends Template
 
                 if ($value instanceof Phrase) {
                     $value = (string)$value;
-                } elseif ($attribute->getFrontendInput() == 'price' && is_string($value)) {
+                } elseif ($attribute->getFrontendInput() === 'price' && is_string($value)) {
                     $value = $this->priceCurrency->convertAndFormat($value);
                 }
 
@@ -112,7 +106,7 @@ class Attributes extends Template
                     $attributeData = [
                         'label' => $attribute->getStoreLabel(),
                         'value' => $value,
-                        'code' => $attributeCode,
+                        'code'  => $attributeCode,
                     ];
 
                     if (array_key_exists($attributeCode, self::ATTRIBUTES_TO_SHOW)) {
@@ -146,16 +140,14 @@ class Attributes extends Template
     }
 
     /**
-     * Determine if we should display the attribute on the front-end.
+     * Determine if the attribute should be displayed on the front-end.
      *
-     * @param \Magento\Eav\Model\Entity\Attribute\AbstractAttribute $attribute
+     * @param AbstractAttribute $attribute
      * @param array $excludeAttr
      * @return bool
      */
-    protected function isVisibleOnFrontend(
-        \Magento\Eav\Model\Entity\Attribute\AbstractAttribute $attribute,
-        array $excludeAttr
-    ) {
-        return ($attribute->getIsVisibleOnFront() && !in_array($attribute->getAttributeCode(), $excludeAttr));
+    protected function isVisibleOnFrontend(AbstractAttribute $attribute, array $excludeAttr): bool
+    {
+        return ($attribute->getIsVisibleOnFront() && !in_array($attribute->getAttributeCode(), $excludeAttr, true));
     }
 }

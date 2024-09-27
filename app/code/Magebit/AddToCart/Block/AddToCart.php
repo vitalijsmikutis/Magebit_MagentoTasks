@@ -15,25 +15,39 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Magebit\AddToCart\Block;
 
 use Magento\Catalog\Block\Product\AbstractProduct;
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Block\Product\Context;
+use Magento\Catalog\Api\Data\ProductInterface;
 
 class AddToCart extends AbstractProduct
 {
-    protected $productRepository;
-
+    /**
+     * Constructor.
+     *
+     * @param Context $context
+     * @param ProductRepositoryInterface $productRepository
+     * @param array $data
+     */
     public function __construct(
-        \Magento\Catalog\Block\Product\Context $context,
-        ProductRepositoryInterface $productRepository,
+        private readonly Context $context,
+        private readonly ProductRepositoryInterface $productRepository,
         array $data = []
     ) {
-        $this->productRepository = $productRepository;
         parent::__construct($context, $data);
     }
 
-    public function getProductData($productId)
+    /**
+     * Get product data by product ID.
+     *
+     * @param int $productId
+     * @return ProductInterface
+     */
+    public function getProductData(int $productId): ProductInterface
     {
         return $this->productRepository->getById($productId);
     }

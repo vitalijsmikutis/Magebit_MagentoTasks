@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * This file is part of the Magebit package.
  *
@@ -17,16 +19,19 @@
 
 // phpcs:disable Magento2.Templates.ThisInTemplate.FoundThis
 
-/** @var \Magento\Catalog\Block\Product\View $block */
+use Magento\Catalog\Block\Product\View;
+use Magento\CatalogInventory\Api\Data\StockItemInterface;
+
+/** @var View $block */
 ?>
 
 <?php
 $product = $block->getProduct();
+/** @var StockItemInterface|null $stockItem */
 $stockItem = $product->getExtensionAttributes()->getStockItem();
-$maxQty = $stockItem ? $stockItem->getQty() : 1;
+$maxQty = $stockItem ? (int) $stockItem->getQty() : 1;
 
-$imagePath = $block->getData('image_path');
-
+$imagePath = (string) $block->getData('image_path');
 ?>
 
 <div class="add-to-cart-container" id="custom-counter" data-bind="scope: 'qtyCounter'">
@@ -47,24 +52,24 @@ $imagePath = $block->getData('image_path');
         <?php if ($maxQty > 0): ?>
             <div class="stock-status">
                 <strong>
-                    <img class="stock-checkmark" src="<?= $block->getViewFileUrl($imagePath) ?>" alt="In Stock">
-                    IN STOCK
+                    <img class="stock-checkmark" src="<?= $block->escapeHtml($block->getViewFileUrl($imagePath)) ?>" alt="<?= $block->escapeHtml(__('In Stock')) ?>">
+                    <?= $block->escapeHtml(__('IN STOCK')) ?>
                 </strong>
-                <span><?= $maxQty ?> items available</span>
+                <span><?= $block->escapeHtml((string)$maxQty) ?> <?= $block->escapeHtml(__('items available')) ?></span>
             </div>
         <?php else: ?>
             <div class="stock-status">
-                <strong style="color: red;">OUT OF STOCK</strong>
+                <strong style="color: red;"><?= $block->escapeHtml(__('OUT OF STOCK')) ?></strong>
             </div>
         <?php endif; ?>
 
     </div>
 
-    <form action="<?= $block->getAddToCartUrl($product) ?>" method="post">
-        <input type="hidden" name="product" value="<?= $product->getId() ?>">
+    <form action="<?= $block->escapeUrl($block->getAddToCartUrl($product)) ?>" method="post">
+        <input type="hidden" name="product" value="<?= $block->escapeHtmlAttr($product->getId()) ?>">
         <input type="hidden" name="qty" data-bind="value: qty">
         <button type="submit" class="add-to-cart-custom-btn">
-            <?= __('Add to Cart') ?>
+            <?= $block->escapeHtml(__('Add to Cart')) ?>
         </button>
     </form>
 </div>
@@ -77,7 +82,7 @@ $imagePath = $block->getData('image_path');
                     "qtyCounter": {
                         "component": "Magento_Catalog/js/qty-counter",
                         "qty": 1,
-                        "maxQty": <?= $maxQty ?>
+                        "maxQty": <?= (int)$maxQty ?>
                     }
                 }
             }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * This file is part of the Magebit package.
  *
@@ -17,22 +19,27 @@
 
 // phpcs:disable Magento2.Templates.ThisInTemplate.FoundThis
 
-/** @var \Magebit\ProductAttributes\Block\Attributes $block */
+use Magebit\ProductAttributes\Block\Attributes;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Helper\Output as CatalogOutput;
+
+/** @var Attributes $block */
 
 ?>
 
 <?php
+/** @var CatalogOutput $_helper */
+$_helper = $block->helper(CatalogOutput::class);
 
-$_helper = $this->helper(Magento\Catalog\Helper\Output::class);
+/** @var Product|null $product */
 $product = $block->getProduct();
 
-if (!$product instanceof \Magento\Catalog\Model\Product) {
+if (!$product instanceof Product) {
     return;
 }
 
 $displayedAttributes = $block->getAdditionalData();
-$shortDescription = $product->getData('short_description');
-
+$shortDescription = (string) $product->getData('short_description');
 ?>
 
 <div class="product-attributes-panel">
@@ -42,7 +49,7 @@ $shortDescription = $product->getData('short_description');
                 <?php foreach ($displayedAttributes as $_data) : ?>
                     <?php
                     $attributeCode = strtolower($_data['code']);
-                    $attributeLabel = $_data['label'];
+                    $attributeLabel = (string) $_data['label'];
                     ?>
                     <li class="attribute-item-custom">
                         <span class="attribute-name"><?= $block->escapeHtml($attributeLabel) ?>:</span>
@@ -52,7 +59,7 @@ $shortDescription = $product->getData('short_description');
             </ul>
         <?php endif; ?>
         <div class="attribute-description">
-            <?= $shortDescription ?>
+            <?= $block->escapeHtml($shortDescription) ?>
         </div>
     </div>
 </div>

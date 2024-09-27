@@ -1,7 +1,24 @@
+<!--
+    /**
+     * This file is part of the Magebit package.
+     *
+     * DISCLAIMER
+     *
+     * Do not edit or add to this file if you wish to upgrade Magebit PageListWidget
+     * to newer versions in the future.
+     *
+     * @copyright Copyright (c) 2024 Magebit, Ltd. (https://magebit.com/)
+     * @license   GNU General Public License ("GPL") v3.0
+     *
+     * For the full copyright and license information, please view the LICENSE
+     * file that was distributed with this source code.
+     */
+-->
+
 <widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
-    <widget id="magebit_pagelistwidget" class="Magebit\PageListWidget\Block\Widget\PageList"
-    >
+
+    <widget id="magebit_pagelistwidget" class="Magebit\PageListWidget\Block\Widget\PageList">
         <label translate="true">Page List Widget</label>
         <description translate="true">Display a list of CMS pages</description>
         <parameters>

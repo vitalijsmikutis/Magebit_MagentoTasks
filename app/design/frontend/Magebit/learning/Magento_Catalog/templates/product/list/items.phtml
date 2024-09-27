@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * This file is part of the Magebit package.
  *
@@ -14,15 +16,19 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-/* @var $block \Magento\Catalog\Block\Product\AbstractProduct */
 
-/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
+use Magento\Catalog\Block\Product\ProductList\Related;
+use Magento\Catalog\Block\Product\ProductList\Upsell;
+
+/* @var $block AbstractProduct */
+/* @var $secureRenderer SecureHtmlRenderer */
+
 ?>
 
 <?php
 switch ($type = $block->getType()) {
     case 'related':
-        /** @var \Magento\Catalog\Block\Product\ProductList\Related $block */
+        /** @var Related $block */
         if ($exist = $block->getItems()->getSize()) {
             $type = 'related';
             $image = 'related_products_list';
@@ -33,7 +39,7 @@ switch ($type = $block->getType()) {
         break;
 
     case 'upsell':
-        /** @var \Magento\Catalog\Block\Product\ProductList\Upsell $block */
+        /** @var Upsell $block */
         if ($exist = count($block->getItemCollection()->getItems())) {
             $type = 'upsell';
             $image = 'upsell_products_list';
@@ -64,7 +70,7 @@ $_item = null;
                         <div class="product-item-details">
                             <strong class="product-item-name"><?= $block->escapeHtml($_item->getName()) ?></strong>
                             <?= $block->getReviewsSummaryHtml($_item, 'short') ?>
-                            <div class="product-item-price ">
+                            <div class="product-item-price">
                                 <?= /* @noEscape */ $block->getProductPrice($_item) ?>
                             </div>
                         </div>
