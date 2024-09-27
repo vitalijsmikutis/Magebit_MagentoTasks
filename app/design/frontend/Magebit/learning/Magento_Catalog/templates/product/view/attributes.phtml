@@ -1,0 +1,65 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * This file is part of the Magebit package.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magebit PageListWidget
+ * to newer versions in the future.
+ *
+ * @copyright Copyright (c) 2024 Magebit, Ltd. (https://magebit.com/)
+ * @license   GNU General Public License ("GPL") v3.0
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+// phpcs:disable Magento2.Templates.ThisInTemplate.FoundThis
+
+use Magebit\ProductAttributes\Block\Attributes;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Helper\Output as CatalogOutput;
+
+/** @var Attributes $block */
+
+?>
+
+<?php
+/** @var CatalogOutput $_helper */
+$_helper = $block->helper(CatalogOutput::class);
+
+/** @var Product|null $product */
+$product = $block->getProduct();
+
+if (!$product instanceof Product) {
+    return;
+}
+
+$displayedAttributes = $block->getAdditionalData();
+$shortDescription = (string) $product->getData('short_description');
+?>
+
+<div class="product-attributes-panel">
+    <div class="product-description">
+        <?php if (!empty($displayedAttributes)) : ?>
+            <ul class="additional-attributes-list">
+                <?php foreach ($displayedAttributes as $_data) : ?>
+                    <?php
+                    $attributeCode = strtolower($_data['code']);
+                    $attributeLabel = (string) $_data['label'];
+                    ?>
+                    <li class="attribute-item-custom">
+                        <span class="attribute-name"><?= $block->escapeHtml($attributeLabel) ?>:</span>
+                        <span class="attribute-value"><?= /* @noEscape */ $_helper->productAttribute($product, $_data['value'], $_data['code']) ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+        <div class="attribute-description">
+            <?= $block->escapeHtml($shortDescription) ?>
+        </div>
+    </div>
+</div>
