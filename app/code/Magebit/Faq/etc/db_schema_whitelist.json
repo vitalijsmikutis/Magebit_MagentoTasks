@@ -1,0 +1,12 @@
+{
+    "magebit_faq": {
+        "columns": {
+            "id": true,
+            "question": true,
+            "answer": true,
+            "status": true,
+            "position": true,
+            "updated_at": true
+        }
+    }
+}
