@@ -46,7 +46,7 @@ class FaqManagement implements FaqManagementInterface
             throw new NoSuchEntityException(__('FAQ with id %1 does not exist.', $faqId));
         }
 
-        $faq->setStatus(1); // Assuming 1 means enabled
+        $faq->setStatus(1);
         $this->faqRepository->save($faq);
     }
 
@@ -64,7 +64,7 @@ class FaqManagement implements FaqManagementInterface
             throw new NoSuchEntityException(__('FAQ with id %1 does not exist.', $faqId));
         }
 
-        $faq->setStatus(0); // Assuming 0 means disabled
+        $faq->setStatus(0);
         $this->faqRepository->save($faq);
     }
 }

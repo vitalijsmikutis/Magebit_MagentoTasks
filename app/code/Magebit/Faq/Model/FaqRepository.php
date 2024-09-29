@@ -1,28 +1,72 @@
 <?php
 
+/**
+ * This file is part of the Magebit package.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magebit FAQ
+ * to newer versions in the future.
+ *
+ * @copyright Copyright (c) 2024 Magebit, Ltd. (https://magebit.com/)
+ * @license   GNU General Public License ("GPL") v3.0
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Magebit\Faq\Model;
 
-use Magebit\Faq\Api\Data\FaqInterface;
 use Magebit\Faq\Api\FaqRepositoryInterface;
-use Magento\Framework\Exception\NoSuchEntityException;
+use Magebit\Faq\Api\Data\FaqInterface;
+use Magebit\Faq\Api\Data\FaqSearchResultsInterface;
+use Magebit\Faq\Api\Data\FaqSearchResultsInterfaceFactory;
 use Magebit\Faq\Model\ResourceModel\Faq as FaqResource;
 use Magebit\Faq\Model\ResourceModel\Faq\CollectionFactory as FaqCollectionFactory;
+use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Api\SearchResultsInterfaceFactory;
+use Magento\Framework\Api\SortOrder;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\CouldNotDeleteException;
 
+/**
+ * Class FaqRepository
+ * This class implements the CRUD operations for the FAQ entity.
+ *
+ * @package Magebit\Faq\Model
+ */
 class FaqRepository implements FaqRepositoryInterface
 {
-    private FaqResource $faqResource;
+    private FaqResource $resource;
+    private FaqFactory $faqFactory;
     private FaqCollectionFactory $faqCollectionFactory;
+    private FaqSearchResultsInterfaceFactory $searchResultsFactory;
 
-    public function __construct(FaqResource $faqResource, FaqCollectionFactory $faqCollectionFactory)
-    {
-        $this->faqResource = $faqResource;
+    /**
+     * FaqRepository constructor.
+     *
+     * @param FaqResource $resource
+     * @param FaqFactory $faqFactory
+     * @param FaqCollectionFactory $faqCollectionFactory
+     * @param FaqSearchResultsInterfaceFactory $searchResultsFactory
+     */
+    public function __construct(
+        FaqResource $resource,
+        FaqFactory $faqFactory,
+        FaqCollectionFactory $faqCollectionFactory,
+        FaqSearchResultsInterfaceFactory $searchResultsFactory
+    ) {
+        $this->resource = $resource;
+        $this->faqFactory = $faqFactory;
         $this->faqCollectionFactory = $faqCollectionFactory;
+        $this->searchResultsFactory = $searchResultsFactory;
     }
 
     /**
-     * Get FAQ by ID
+     * Get FAQ by its ID.
      *
      * @param int $faqId
      * @return FaqInterface
@@ -30,50 +74,98 @@ class FaqRepository implements FaqRepositoryInterface
      */
     public function get(int $faqId): FaqInterface
     {
-        // Logic to load FAQ by ID
+        $faq = $this->faqFactory->create();
+        $this->resource->load($faq, $faqId);
+        if (!$faq->getId()) {
+            throw new NoSuchEntityException(__('FAQ with id "%1" does not exist.', $faqId));
+        }
+        return $faq;
     }
 
     /**
-     * Save FAQ
+     * Save FAQ.
      *
      * @param FaqInterface $faq
      * @return FaqInterface
+     * @throws CouldNotSaveException
      */
     public function save(FaqInterface $faq): FaqInterface
     {
-        // Logic to save FAQ
+        try {
+            $this->resource->save($faq);
+        } catch (\Exception $exception) {
+            throw new CouldNotSaveException(__($exception->getMessage()));
+        }
+        return $faq;
     }
 
     /**
-     * Delete FAQ by ID
+     * Retrieve a list of FAQs matching the provided search criteria.
      *
-     * @param int $faqId
-     * @return void
-     * @throws NoSuchEntityException
+     * @param SearchCriteriaInterface $searchCriteria
+     * @return FaqSearchResultsInterface
      */
-    public function delete(int $faqId): void
+    public function getList(SearchCriteriaInterface $searchCriteria): FaqSearchResultsInterface
     {
-        // Logic to delete FAQ by ID
+        $collection = $this->faqCollectionFactory->create();
+
+        // Apply filters, sort orders, and pagination
+        foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
+            foreach ($filterGroup->getFilters() as $filter) {
+                $condition = $filter->getConditionType() ?: 'eq';
+                $collection->addFieldToFilter($filter->getField(), [$condition => $filter->getValue()]);
+            }
+        }
+
+        // Sorting
+        foreach ((array)$searchCriteria->getSortOrders() as $sortOrder) {
+            $collection->setOrder(
+                $sortOrder->getField(),
+                ($sortOrder->getDirection() == SortOrder::SORT_ASC) ? 'ASC' : 'DESC'
+            );
+        }
+
+        // Pagination
+        $collection->setCurPage($searchCriteria->getCurrentPage());
+        $collection->setPageSize($searchCriteria->getPageSize());
+
+        // Set search results
+        $searchResults = $this->searchResultsFactory->create();
+        $searchResults->setSearchCriteria($searchCriteria);
+        $searchResults->setItems($collection->getItems());
+        $searchResults->setTotalCount($collection->getSize());
+
+        return $searchResults;
     }
 
     /**
-     * Delete FAQ
+     * Delete FAQ by entity.
      *
      * @param FaqInterface $faq
-     * @return void
+     * @return bool
+     * @throws CouldNotDeleteException
      */
-    public function deleteById(FaqInterface $faq): void
+    public function delete(FaqInterface $faq): bool
     {
-        // Logic to delete FAQ entity
+        try {
+            $this->resource->delete($faq);
+        } catch (\Exception $exception) {
+            throw new CouldNotDeleteException(__($exception->getMessage()));
+        }
+        return true;
     }
 
     /**
-     * Get list of FAQs
+     * Delete FAQ by its ID.
      *
-     * @return FaqInterface[]
+     * @param int $faqId
+     * @return bool
+     * @throws NoSuchEntityException
+     * @throws CouldNotDeleteException
      */
-    public function getList(): array
+    public function deleteById(int $faqId): bool
     {
-        // Logic to get the list of FAQs
+        $faq = $this->get($faqId);
+        return $this->delete($faq);
     }
 }

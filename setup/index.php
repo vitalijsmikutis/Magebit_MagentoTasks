@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
@@ -36,6 +37,7 @@ set_error_handler([$handler, 'handler']);
 // Render Setup Wizard landing page
 $objectManager = Bootstrap::create(BP, $_SERVER)->getObjectManager();
 
+
 $licenseClass = $objectManager->create(License::class);
 $metaClass = $objectManager->create(ProductMetadata::class);
 /** @var License $license */
@@ -45,6 +47,8 @@ $version = $metaClass->getVersion();
 
 $request = new Request();
 $basePath = $request->getBasePath();
+
+
 
 ob_start();
 require_once __DIR__ . '/view/magento/setup/index.phtml';

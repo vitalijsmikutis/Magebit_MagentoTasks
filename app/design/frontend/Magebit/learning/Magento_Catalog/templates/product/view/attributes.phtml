@@ -29,10 +29,11 @@ use Magento\Catalog\Helper\Output as CatalogOutput;
 
 <?php
 /** @var CatalogOutput $_helper */
-$_helper = $block->helper(CatalogOutput::class);
+$_helper = $block->getHelper(CatalogOutput::class);
 
 /** @var Product|null $product */
 $product = $block->getProduct();
+
 
 if (!$product instanceof Product) {
     return;

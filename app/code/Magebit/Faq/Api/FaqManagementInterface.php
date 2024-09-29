@@ -17,7 +17,7 @@
 
 declare(strict_types=1);
 
-namespace Magebit\Faq\Api\Data;
+namespace Magebit\Faq\Api;
 
 /**
  * Interface FaqManagementInterface
